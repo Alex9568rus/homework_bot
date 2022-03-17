@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(
     stream=sys.stdout,
     level=logging.INFO,
-    format='%(asctime)s, %(level_name)s, %(name)s, %(message)s'
+    format='%(asctime)s, %(levelname)s, %(name)s, %(message)s'
 )
 logger.addHandler(logging.StreamHandler())
 
@@ -39,13 +39,13 @@ logger.addHandler(logging.StreamHandler())
 def send_message(bot, message):
     """Send message in telegram chat."""
     try:
-        logging.info('Отправление сообщения')
+        logger.info('Отправление сообщения')
         bot.send_message(
             chat_id=TELEGRAM_CHAT_ID,
             text=message
         )
     except Exception as error:
-        logging.error(error)
+        logger.error(error)
         raise Exception('Возникла ошибка при отпралении сообщения!')
 
 
@@ -58,10 +58,10 @@ def get_api_answer(current_timestamp):
         logging.info('Попытка сделать запрос')
         response = requests.get(ENDPOINT, headers=HEADERS, params=params)
         if response.status_code != HTTPStatus.OK:
-            logging.error('Указанный ресурс недоступен')
+            logger.error('Указанный ресурс недоступен')
             raise Exception('Указанный ресурс недоступен')
     except Exception as error:
-        logging.error(error)
+        logger.error(error)
         raise Exception('Возникла ошибка при обращении к указанному API')
 
     return response.json()
@@ -70,13 +70,13 @@ def get_api_answer(current_timestamp):
 def check_response(response):
     """Check response API."""
     if not isinstance(response, dict):
-        logging.error('Полученный ответ не является словарем')
+        logger.error('Полученный ответ не является словарем')
         raise TypeError('Response не является словарем')
     elif 'homeworks' not in response:
-        logging.error('Ключ homeworks не найден')
+        logger.error('Ключ homeworks не найден')
         raise KeyError('Ключ homeworks не найден')
     elif type(response['homeworks']) != list:
-        logging.error('Необходимо получить список')
+        logger.error('Необходимо получить список')
         raise TypeError('Получен не список')
     return response['homeworks']
 
@@ -86,7 +86,7 @@ def parse_status(homework):
     homework_name = homework.get('homework_name')
     homework_status = homework.get('status')
     if homework_status not in HOMEWORK_STATUSES:
-        logging.error('Недоступный статус')
+        logger.error('Недоступный статус')
         raise KeyError('Такого статуса не найдено')
     verdict = HOMEWORK_STATUSES[homework_status]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
@@ -97,7 +97,7 @@ def check_tokens():
     if PRACTICUM_TOKEN and TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
         return True
     else:
-        logging.critical('Ошибка при проверке значений токенов')
+        logger.critical('Ошибка при проверке значений токенов')
         return False
 
 
@@ -120,7 +120,7 @@ def main():
 
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
-            logging.error(message)
+            logger.error(message)
             send_message(bot, message)
             time.sleep(RETRY_TIME)
 
