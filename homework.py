@@ -51,7 +51,7 @@ def get_api_answer(current_timestamp):
     try:
         logging.info(
             f'Попытка сделать запрос к: {ENDPOINT}'
-            f'с токеном: {HEADERS}'
+            f'с токеном: SECRET'
             f'с временной менткой: {params}'
         )
         response = requests.get(ENDPOINT, headers=HEADERS, params=params)
