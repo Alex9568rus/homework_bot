@@ -12,6 +12,8 @@ import exception
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
+
 
 PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('BOT_TOKEN')
@@ -49,7 +51,7 @@ def get_api_answer(current_timestamp):
     params = {'from_date': timestamp}
 
     try:
-        logging.info(
+        logger.info(
             f'Попытка сделать запрос к: {ENDPOINT}'
             f'с токеном: SECRET'
             f'с временной менткой: {params}'
@@ -78,15 +80,15 @@ def check_response(response):
 
 def parse_status(homework):
     """Extract information about status of homework."""
-    try:
+    if 'homework_name' not in homework:
+        raise KeyError('Название не найдено')
+    elif 'status' not in homework:
+        raise KeyError('Такого статуса не найдено')
+    else:
         homework_name = homework.get('homework_name')
         homework_status = homework.get('status')
         verdict = HOMEWORK_STATUSES[homework_status]
         return f'Изменился статус проверки работы "{homework_name}". {verdict}'
-    except LookupError:
-        raise KeyError('Название не найдено')
-    except LookupError:
-        raise KeyError('Такого статуса не найдено')
 
 
 def check_tokens():
@@ -105,15 +107,18 @@ def main():
         logger.critical(exception.TokenCheckError)
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
+    message = 'Нужно подождать'
     while True:
         try:
             response = get_api_answer(current_timestamp)
             response_check = check_response(response)
             if response_check:
                 last_message = parse_status(response_check[0])
-                send_message(bot, last_message)
+                if last_message != message:
+                    send_message(bot, last_message)
+                    message = last_message
             else:
-                logger.debug('Нужно подождать')
+                logger.debug(message)
             current_timestamp = response['current_date']
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
@@ -131,5 +136,4 @@ if __name__ == '__main__':
         format='%(asctime)s, %(levelname)s, %(name)s, %(message)s',
         handlers=[logging.StreamHandler(stream=sys.stdout)]
     )
-    logger = logging.getLogger(__name__)
     main()
