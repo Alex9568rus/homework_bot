@@ -17,7 +17,9 @@ Telegram-бот, работающий с API сервиса Практикум.�
 * `git clone git@github.com:Alex9568rus/homework_bot.git`
 * `cd homework_bot`
 
-2. Установить зависимости
+2. Установить окружение и зависимости
+* `python3 -m venv venv`
+* `source venv/bin/activate`
 * `python3 -m pip install --upgrade pip`
 * `pip install -r requirements.txt`
 
@@ -29,5 +31,5 @@ Telegram-бот, работающий с API сервиса Практикум.�
   TELEGRAM_TOKEN=<токен_телеграм_бота>
   TELEGRAM_CHAT_ID=<id_чата>
   ```
-4. Запустить проект
+4. Запустить проект  
 `python3 homework.py`
